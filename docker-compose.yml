@@ -1,0 +1,30 @@
+version: "3"
+services:
+  database:
+    container_name: codimd_database
+    image: postgres:11.6-alpine
+    env_file: .env
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - "database-data:/var/lib/postgresql/data"
+    restart: always
+  codimd:
+    container_name: codimd
+    image: hackmdio/hackmd:2.2.0
+    env_file: .env
+    environment:
+      - CMD_DB_URL=postgres://${DB_USER}:${DB_PASSWORD}@database:5432/${DB_NAME}
+      - CMD_USECDN=false
+    depends_on:
+      - database
+    ports:
+      - "3000:3000"
+    volumes:
+      - upload-data:/home/hackmd/app/public/uploads
+    restart: always
+volumes:
+  database-data: {}
+  upload-data: {}
